@@ -1,4 +1,6 @@
 <?php
+require 'Curl.php';
+
 use \Curl\Curl;
 /**
  * Ignitelinkedin Codeigniter wrapper library for the linkedin PHP api
@@ -91,7 +93,6 @@ class Ignitelinkedin
                 if ($this->getSessionValue('state') == $this->get('state')) {
                     $this->getAccessTokenFromCode($code);
                     if($this->isAuthenticated()) {
-                        echo "we are authenticated";
                     $result['success'] = 1;
                     return $result;
                     }
@@ -124,7 +125,7 @@ class Ignitelinkedin
             );
 
         // Authentication request
-        $url = 'https://www.linkedin.com/uas/oauth2/authorization?';
+        $url = 'https://www.linkedin.com/uas/oauth2/authorization?' . http_build_query($params);
         $this->setSessionValue('state', $params['state']);
         return $url;
 
@@ -250,15 +251,15 @@ class Ignitelinkedin
             'redirect_uri' => $this->redirect_uri,
             );
 
-        $url = 'https://www.linkedin.com/uas/oauth2/accessToken?';
+        $url = 'https://www.linkedin.com/uas/oauth2/accessToken';
         $this->curl= new Curl();
         $this->curl->post($url, $params);
 
         // Retrieve access token information
-       if($this->curl->error()) {
+       if($this->curl->error) {
             throw new Exception ($this->curl->error_code . ' ' . $this->curl->error_message);
         } else {
-           return json_decode($this->curl->response);
+           return $this->curl->response;
         }
     }
 
@@ -277,10 +278,10 @@ class Ignitelinkedin
         // Need to use HTTPS
         $url = 'https://api.linkedin.com' . $this->prepareUrlFields();
         $this->curl->get($url);
-        if($this->curl->error()) {
+        if($this->curl->error) {
             throw new Exception ($this->curl->error_code . ' ' . $this->curl->error_message);
         } else {
-           return json_decode($this->curl->response);
+           return $this->curl->response;
         }
         
     }
